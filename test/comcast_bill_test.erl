@@ -270,7 +270,7 @@ run_test()->
 
     eg_pdf:set_font(PDF,"Helvetica-Bold", 10),
     eg_pdf_lib:moveAndShow(PDF, 25,525,  "Total Comcast High-Speed Internet"),  
-    eg_pdf_lib:moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica-Bold", 10, "$99.95"),545, "$99.95"),
+    eg_pdf_lib:moveAndShow(PDF, 300 - eg_pdf:get_string_width(PDF, "Helvetica-Bold", 10, "$99.95"),525, "$99.95"),
 
     eg_pdf:set_dash(PDF, dot),
     eg_pdf:set_stroke_color(PDF,black),
