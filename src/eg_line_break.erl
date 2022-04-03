@@ -284,7 +284,7 @@ force_split(Str, StrLen, Len, GLen, Font, PointSize) ->
 %% Len = 1000th pt
 fits(Str, Len, GLen, Font, PointSize) ->
     HStr = lists:sublist(Str, GLen),
-    HWLen = misc:ceiling(eg_richText:width_of(Font, PointSize, HStr)),
+    HWLen = eg_lib:ceiling(eg_richText:width_of(Font, PointSize, HStr)),
     HWLen =< Len.
 
 

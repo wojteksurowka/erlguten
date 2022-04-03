@@ -21,7 +21,7 @@
 
 -module(eg_lib).
 
--export([find_files/3, find_files/5]).
+-export([find_files/3, find_files/5, floor/1, ceiling/1]).
 
 -include_lib("kernel/include/file.hrl").
 
@@ -88,4 +88,20 @@ file_type(File) ->
 	    end;
 	_ ->
 	    error
+    end.
+
+floor(X) ->
+    T = erlang:trunc(X),
+    case (X - T) of
+        Neg when Neg < 0 -> T - 1;
+        Pos when Pos > 0 -> T;
+        _ -> T
+    end.
+    
+ceiling(X) ->
+    T = erlang:trunc(X),
+    case (X - T) of
+        Neg when Neg < 0 -> T;
+        Pos when Pos > 0 -> T + 1;
+        _ -> T
     end.

@@ -38,7 +38,7 @@
         get_png_content/1,
         deflate_stream/1,
         inflate_stream/1]).
--compile(export_all).
+
 -include("../include/eg.hrl").
 
 %% ============================================================================
@@ -402,8 +402,8 @@ extractAlphaAndData({png_head,{Width, _Height, Color_type, Data_precision}},Imag
     ok = file:write_file("original.bin",[Decompressed]),
     
 %% calc the length of a scan line
-  Offset = ceiling( ((pngbits(Color_type) + 1) * Data_precision) /8),
-  ByteWidth = 1 + ceiling((Width * (pngbits(Color_type) + 1) * Data_precision) /8),
+  Offset = eg_lib:ceiling( ((pngbits(Color_type) + 1) * Data_precision) /8),
+  ByteWidth = 1 + eg_lib:ceiling((Width * (pngbits(Color_type) + 1) * Data_precision) /8),
 
 %% extract the scan lines into tuples of filter number and byte stream
   AllScanLines = extractScanLines(ByteWidth,Decompressed),
@@ -488,7 +488,7 @@ filter(X,A,B,C, Method) ->
     0 -> X;
     1 -> (X + A) rem 256;
     2 -> (X + B) rem 256;
-    3 -> (X + floor( (A + B)/2) ) rem 256;
+    3 -> (X + eg_lib:floor( (A + B)/2) ) rem 256;
     4 -> (X + paethPredictor(A,B,C)) rem 256
   end.
 
@@ -528,20 +528,3 @@ deflate_stream(Data) ->
   Compressed = list_to_binary([B1,B2]),
   zlib:close(Z),
   {ok,Compressed}.
-  
-  
-floor(X) ->
-    T = erlang:trunc(X),
-    case (X - T) of
-        Neg when Neg < 0 -> T - 1;
-        Pos when Pos > 0 -> T;
-        _ -> T
-    end.
-    
-ceiling(X) ->
-    T = erlang:trunc(X),
-    case (X - T) of
-        Neg when Neg < 0 -> T;
-        Pos when Pos > 0 -> T + 1;
-        _ -> T
-    end.
