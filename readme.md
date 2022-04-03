@@ -2,6 +2,13 @@
   
 # ErlGuten
 
+ErlGuten was created by Joe Armstrong and others (see the LICENSE file for details). It was not available
+in hex.pm, and I wanted to use it conveniently as a dependency in systems using rebar3 as the build tool.
+
+I forked it, made sure that ErlGuten can be compiled by the current Erlang version (some files used
+obsolete encoding and could not be built anymore) and fixed some other incompatibilities found by Dialyzer.
+This software is published in hex.pm. To use it add `erlguten` as a dependency in `rebar.config`.
+
 ## Building
 
 ErlGuten uses rebar to build, it also has a Makefile wrapper around the rebar tasks.
@@ -81,7 +88,7 @@ with calls to the pdf module.
 
 `eg_pdf:set_pagesize(PDF,a4),`
 
-    To set the page size of the PDF. Other choices are letter, legal, lots of A formats and B formats.
+    To set the page size of the PDF. Other choices are letter, legal, and lots of A and B  formats
 
 `eg_pdf:set_page(PDF,1),`
 

@@ -1,6 +1,6 @@
 {application, erlguten,
  [
-  {description, "A system for hiqh quality typesetting"},
+  {description, "Erlang PDF generator"},
   {vsn, "1.0.0"},
   {modules, [
              eg_afm,
@@ -57,5 +57,7 @@
                   stdlib,
                   inets
                  ]},
-  {env, []}
+  {env, []},
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/wojteksurowka/erlguten"}]}
  ]}.
