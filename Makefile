@@ -1,18 +1,16 @@
 all: compile
 
 clean:
-	@./rebar clean
+	@rebar3 clean
 
 nuke: clean
 	@rm -rf deps
 
 check: compile
-	@./rebar eunit skip_deps=true
+	@rebar3 eunit skip_deps=true
 
 dependencies:
-	@./rebar get-deps
+	@rebar3 get-deps
 
 compile: dependencies
-	@./rebar compile
-
-include install.mk
+	@rebar3 compile
