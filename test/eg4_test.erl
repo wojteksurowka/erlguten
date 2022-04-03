@@ -89,7 +89,7 @@ showem(PDF, Y, [H|T], PageNo) ->
     eg_pdf:set_font(PDF,H, ?FONT_H),
     X2 = X1 + 120,
     eg_pdf_lib:moveAndShow(PDF, X2, Y,
-                           "abcdefg ABCDEFG 1234567890 åäö ÅÄÖ"),
+                           "abcdefg ABCDEFG 1234567890 Ã¥Ã¤Ã¶ Ã…Ã„Ã–"),
 
     eg_pdf:set_font(PDF,H, ?FONT_Hs),
     X3 = X1 + 20,

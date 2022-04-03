@@ -48,7 +48,7 @@ run_test() ->
 	      "2", "39,00", "78,00"}],
     BGNr = "237-4825",
     test({"Johan Bevemyr",
-	  "Gösta Tamms väg 16",
+	  "GÃ¶sta Tamms vÃ¤g 16",
 	  "191 33 Sollentuna"},
 	 INr,IDate,CNr,
 	 ONr, ODate,
@@ -75,10 +75,10 @@ test(Address, Nr, Date, PNr, ONr, ODate, ByDate, Items,
     %% ebutikens logga
     their_logo(PDF, 400, 780),
 
-    %% vår logga
+    %% vÃ¥r logga
     our_logo(PDF, 400, 750),
 
-    %% allmän info, org nr etc
+    %% allmÃ¤n info, org nr etc
     our_info(PDF, BGNr, 400, 730),
 
     %% Address till kund
@@ -102,7 +102,7 @@ test(Address, Nr, Date, PNr, ONr, ODate, ByDate, Items,
     B0 = 587,
     eg_pdf:set_font(PDF, "Helvetica-Bold", 8),
     eg_pdf_lib:moveAndShow(PDF, 40, B0, to_mac("Artikelnr")),
-    eg_pdf_lib:moveAndShow(PDF, 90, B0, to_mac("Artikelbenämning")),
+    eg_pdf_lib:moveAndShow(PDF, 90, B0, to_mac("ArtikelbenÃ¤mning")),
     eg_pdf_lib:moveAndShow(PDF, 430, B0, to_mac("Antal")),
     eg_pdf_lib:moveAndShow(PDF, 468, B0, [8#210|"-pris"]),
     eg_pdf_lib:moveAndShow(PDF, 512, B0, to_mac("Belopp")),
@@ -113,7 +113,7 @@ test(Address, Nr, Date, PNr, ONr, ODate, ByDate, Items,
     %% Senast tillhanda
     at_latest(PDF, ByDate, 35, 335),
 
-    %% Betalningssätt
+    %% BetalningssÃ¤tt
     method_of_pay(PDF, "Faktura", 35, 320),
 
     %% OCR
@@ -222,7 +222,7 @@ use_ocr(PDF, OCR, X, Y) ->
 
 method_of_pay(PDF, Method, X, Y) ->
     eg_pdf:set_font(PDF, "Helvetica", 9),
-    eg_pdf_lib:moveAndShow(PDF, X, Y, to_mac("Betalningssätt:  "++Method)).
+    eg_pdf_lib:moveAndShow(PDF, X, Y, to_mac("BetalningssÃ¤tt:  "++Method)).
 
 at_latest(PDF, ByDate, X, Y) ->
     eg_pdf:set_font(PDF, "Helvetica-Bold", 9),
@@ -291,18 +291,18 @@ bg_avi(PDF, X, Y) ->
     eg_pdf:set_font(PDF, "Helvetica", 6),
     eg_pdf_lib:moveAndShow(PDF, X+32+41, 85-6.2+Y, "Referensnummer"),
     eg_pdf_lib:moveAndShow(PDF, X+32+202.6, 85-6.2+Y, "Kronor"),
-    eg_pdf_lib:moveAndShow(PDF, X+32+266.4, 85-6.2+Y, to_mac("Öre")),
+    eg_pdf_lib:moveAndShow(PDF, X+32+266.4, 85-6.2+Y, to_mac("Ã–re")),
     eg_pdf_lib:moveAndShow(PDF, X+32+287.7, Y+99+25.5-6.2,
                         to_mac("Till bankgiro")),
     eg_pdf_lib:moveAndShow(PDF, X+32+367, Y+99+25.5-6.2,
                         to_mac("Betalningsmottagare")),
     eg_pdf:set_font(PDF, "Helvetica", 8),
     eg_pdf_lib:moveAndShow(PDF, X+32+18.5, 87+Y,
-                        to_mac("VAR GOD GÖR INGA ÄNDRINGAR")),
+                        to_mac("VAR GOD GÃ–R INGA Ã„NDRINGAR")),
     eg_pdf_lib:moveAndShow(PDF, X+32+182.8, 87+Y,
-			to_mac("MEDDELANDEN KAN INTE LÄMNAS PÅ AVIN")),
+			to_mac("MEDDELANDEN KAN INTE LÃ„MNAS PÃ… AVIN")),
     eg_pdf_lib:moveAndShow(PDF, X+32+372, 87+Y,
-			to_mac("DEN AVLÄSES MASKINELLT")),
+			to_mac("DEN AVLÃ„SES MASKINELLT")),
     eg_pdf:set_font(PDF, "Helvetica", 6),
     eg_pdf_lib:moveAndShow(PDF, X+32+347, Y+276-6.2,
 			to_mac("Inbet avgift (ifylls av banken)")),
@@ -338,10 +338,10 @@ bg_avi_lastdate(PDF, X, Y, LastDate) ->
 bg_avi_ocrline(PDF, X, Y, BGNr, Amount, OCR) ->
     eg_pdf:set_font(PDF, "Helvetica", 8),
     eg_pdf_lib:moveAndShow(PDF, X+32+293.3, 187+Y,
-			to_mac("OBS! Uppge alltid nedanstående "
-			       " referensnummer om betalning sker på")),
+			to_mac("OBS! Uppge alltid nedanstÃ¥ende "
+			       " referensnummer om betalning sker pÃ¥")),
     eg_pdf_lib:moveAndShow(PDF, X+32+293.3, 187+Y-10,
-			to_mac("annat sätt än med detta inbetalningskort")),
+			to_mac("annat sÃ¤tt Ã¤n med detta inbetalningskort")),
     eg_pdf:set_font(PDF, ?OCRFONT, ?OCRSIZE),
     eg_pdf_lib:moveAndShow(PDF, X+32+293.3, 187+Y-10-15, OCR),
 
@@ -356,12 +356,12 @@ bg_avi_ocrline(PDF, X, Y, BGNr, Amount, OCR) ->
     eg_pdf_lib:moveAndShow(PDF, X+5, 48.2+Y, Txt).
 
 to_mac(Str) ->
-    F = fun($å) -> 8#214;
-	   ($ä) -> 8#212;
-	   ($ö) -> 8#232;
-	   ($Å) -> 8#201;
-	   ($Ä) -> 8#200;
-	   ($Ö) -> 8#205;
+    F = fun($Ã¥) -> 8#214;
+	   ($Ã¤) -> 8#212;
+	   ($Ã¶) -> 8#232;
+	   ($Ã…) -> 8#201;
+	   ($Ã„) -> 8#200;
+	   ($Ã–) -> 8#205;
 	   (X)  -> X
 	end,
     [F(X) || X <- Str].

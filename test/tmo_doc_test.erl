@@ -27,7 +27,7 @@
 -module(tmo_doc_test).
 -include_lib("eunit/include/eunit.hrl").
 -define(FONT_SIZE, 10).
--define(XML_DIR, "../test/template/").
+-define(XML_DIR, "./test/template/").
 
 -record(doc_info, {system    = " ",
                    type      = " ",
