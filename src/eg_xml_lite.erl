@@ -97,12 +97,12 @@ xml2bin(In, Out) ->
     case file:read_file(In) of
 	{ok, Bin} ->
 	    case parse_all_forms(binary_to_list(Bin), 0) of
-		{ok, Tree, _} ->
+		Tree when is_list(Tree) ->
 		    file:write_file(Out, term_to_binary(Tree));
+        {error, more_data_expected} ->
+		    {error, incomplete};
 		E = {error, _X} ->
-		    E;
-		{more, _} ->
-		    {error, incomplete}
+		    E
 	    end;
 	Error ->
 	    Error

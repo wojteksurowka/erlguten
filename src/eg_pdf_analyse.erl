@@ -673,7 +673,7 @@ unpack(File) ->
     {_, Xref, Trailer} = get_tables(Pdf),
     Info = from_trailer(Trailer, "Info"),
     case get_object(Pdf, Info, Xref) of
-	{_, _, {stream, _Len, Bin, Dict}} ->
+	{_, {stream, _Len, Bin, Dict}} ->
 	    {string, "erlangAddedFile"} = from_dict("Comment", Dict),
 	    case (catch binary_to_term(Bin)) of
 		{erlpdf, FileName, Bin2} ->

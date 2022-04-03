@@ -544,7 +544,7 @@ image1(PID, FilePath, {height, H}) ->
 image1(PID, FilePath, {W, H}) when is_integer(W), is_integer(H)->
     image1(PID, FilePath, {size,{W,H}});
 image1(PID, FilePath, {size,Size})->
-    case file:open(FilePath,read) of
+    case file:open(FilePath,[read]) of
 	{ok,IO} -> 
 	    file:close(IO),
 	    gen_server:cast(PID, {image, FilePath, Size});

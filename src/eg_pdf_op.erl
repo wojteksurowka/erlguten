@@ -78,6 +78,7 @@
          text_rotate_position/3,
          textbr/1,
          transform/6,
+         text_transform/6,
          translate/2,
 
 	 %% internal erlguten utility functions

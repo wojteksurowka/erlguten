@@ -72,7 +72,7 @@
 -include("../include/eg.hrl").
 
 
--export([new_text/2, new_text/3, new_open_text/2, new_open_text/3, 
+-export([new/3, new_text/2, new_text/3, new_open_text/2, new_open_text/3, 
 	 new_link/2, new_link/3, new_action/2, new_line/3, set_flags/2,
          andflags/2, orflags/2, contents/1, flag/1, isflagset/2, rect/1,
 	 set_borderstyle/3, style/1, serialise/2]).
