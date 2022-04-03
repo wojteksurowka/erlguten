@@ -62,18 +62,18 @@ get_words(Text) ->
 %% text from: Svenska Dagbladet (2009-08-05) 
 %%            http://www.svd.se/nyheter/inrikes/artikel_3310817.svd
 text_sv() ->
-    "Ali Mehrabi och hans kompisar skulle överlämna ett brev och en "
-	"film till UD igår. De fick träffa Anders Jörle, presschef för "
-	"UD:s presstjänst, han skulle se till att utrikesminister Carl "
-	"Bildt fick materialet. I brevet vädjar ungdomarna till ministern "
-	"att inte erkänna Mahmoud Ahmadinejad som Irans president. "
+    "Ali Mehrabi och hans kompisar skulle Ã¶verlÃ¤mna ett brev och en "
+	"film till UD igÃ¥r. De fick trÃ¤ffa Anders JÃ¶rle, presschef fÃ¶r "
+	"UD:s presstjÃ¤nst, han skulle se till att utrikesminister Carl "
+	"Bildt fick materialet. I brevet vÃ¤djar ungdomarna till ministern "
+	"att inte erkÃ¤nna Mahmoud Ahmadinejad som Irans president. "
 
 	"Folkpartiets utrikespolitiske talesperson, Birgitta Ohlsson, "
 	"tycker att Sverige borde bli tuffare i sin kritik mot den Iranska "
-	"regimen och att man borde stödja demokratirörelsen i landet. "
-	"Hon påpekar dock att Sverige representerade EU på "
-	"presidentinstallationen och att meningarna där var delade när "
-	"det gäller ceremonin.".
+	"regimen och att man borde stÃ¶dja demokratirÃ¶relsen i landet. "
+	"Hon pÃ¥pekar dock att Sverige representerade EU pÃ¥ "
+	"presidentinstallationen och att meningarna dÃ¤r var delade nÃ¤r "
+	"det gÃ¤ller ceremonin.".
 
 %% text from: BBC (2009-08-05) 
 %%            http://news.bbc.co.uk/2/hi/middle_east/8184240.stm
@@ -96,11 +96,11 @@ text_en() ->
 text_nb() ->
     "Hvordan hadde du forholdt deg til en \"Ringenes Herre\"-filmatisering "
 	"med Paul McCartney som Frodo Baggins, John Lennon som Gandalf the "
-	"Grey og Stanley Kubrick som regissør? "
-	"Det høres ut som et meget surrealistisk og uvirkelig prosjekt, men "
-	"det kunne fort ha vært en realitet. "
+	"Grey og Stanley Kubrick som regissÃ¸r? "
+	"Det hÃ¸res ut som et meget surrealistisk og uvirkelig prosjekt, men "
+	"det kunne fort ha vÃ¦rt en realitet. "
 	"Tolkien-eksperten Michael D. C. Drout skriver blant annet i boka "
-	"si \"J.R.R. Tolkien encyclopedia\" hvordan The Beatles prøvde å "
+	"si \"J.R.R. Tolkien encyclopedia\" hvordan The Beatles prÃ¸vde Ã¥ "
 	"lage film av Tolkien-romanen \"Ringenes Herre\" etter at "
 	"rettighetene var solgt til United Artists i 1968. "
 	"Tanken deres var at The Beatles selv skulle spille hovedrollene "
@@ -110,34 +110,34 @@ text_nb() ->
 %%            http://jp.dk/udland/usa/article1772552.ece
 text_da() ->
     "To amerikanske journalister tilbageholdt i Nordkorea i 140 dage "
-	"brød sammen ved synet af deres familie i USA. Det er godt at "
-	"være fri, siger de. "
-	"I første omgang så Hana Lee lidt forvirret ud. "
-	"Den fireårige pige havde ikke set sin mor i 140 dage. "
-	"Men så knugede hun sig fast til den amerikanske journalist Euna "
+	"brÃ¸d sammen ved synet af deres familie i USA. Det er godt at "
+	"vÃ¦re fri, siger de. "
+	"I fÃ¸rste omgang sÃ¥ Hana Lee lidt forvirret ud. "
+	"Den fireÃ¥rige pige havde ikke set sin mor i 140 dage. "
+	"Men sÃ¥ knugede hun sig fast til den amerikanske journalist Euna "
 	"Lee og ville ikke give slip igen."
-	"Sådan var scenen onsdag eftermiddag dansk tid, da Euna Lee og "
+	"SÃ¥dan var scenen onsdag eftermiddag dansk tid, da Euna Lee og "
 	"Laura Ling ankom til lufthavnen i Burbank, Californien."
-	"De to journalister har været tilbageholdt i Nordkorea, siden de "
-	"i marts blev anholdt ved grænsen mellem Nordkorea og Kina - og "
-	"siden blev idømt 12 år i en arbejdslejr for at have overskredet "
-	"grænsen ulovligt.".
+	"De to journalister har vÃ¦ret tilbageholdt i Nordkorea, siden de "
+	"i marts blev anholdt ved grÃ¦nsen mellem Nordkorea og Kina - og "
+	"siden blev idÃ¸mt 12 Ã¥r i en arbejdslejr for at have overskredet "
+	"grÃ¦nsen ulovligt.".
 
 %% text from: wikipedia (2009-08-06) (About finnish person numbers)
 %%            http://fi.wikipedia.org/wiki/Henkil%C3%B6tunnus
 text_fi() ->
-    "Suomessa henkilötunnus (hetu) annetaan Suomen kansalaisille sekä "
-	"Suomessa pysyvästi tai pitkäaikaisesti (vähintään vuoden) "
-	"oleskeleville ulkomaalaisille. Tunnus voidaan anomuksesta myöntää "
-	"myös tilapäisesti oleskeleville henkilöille. Tunnuksen myöntää "
-	"Väestörekisterikeskus. Henkilötunnusta ei voi käyttää luotettavasti "
-	"henkilöllisyyden todisteena kahdesta syystä: ensinnäkin se ei ole "
+    "Suomessa henkilÃ¶tunnus (hetu) annetaan Suomen kansalaisille sekÃ¤ "
+	"Suomessa pysyvÃ¤sti tai pitkÃ¤aikaisesti (vÃ¤hintÃ¤Ã¤n vuoden) "
+	"oleskeleville ulkomaalaisille. Tunnus voidaan anomuksesta myÃ¶ntÃ¤Ã¤ "
+	"myÃ¶s tilapÃ¤isesti oleskeleville henkilÃ¶ille. Tunnuksen myÃ¶ntÃ¤Ã¤ "
+	"VÃ¤estÃ¶rekisterikeskus. HenkilÃ¶tunnusta ei voi kÃ¤yttÃ¤Ã¤ luotettavasti "
+	"henkilÃ¶llisyyden todisteena kahdesta syystÃ¤: ensinnÃ¤kin se ei ole "
 	"salainen tieto, ja toiseksi se ei ole vaihdettavissa, "
 	"kuten vaikkapa verkkopankin salasana. Valitettavasti "
-	"henkilötunnusta, etenkin sen loppuosaa, usein luullaan "
-	"eräänlaiseksi \"salasanaksi\" vaikkapa pankkikorttiostoksia "
-	"tehdessä tai terveyskeskuksessa asioidessa, mikä johtaa helposti "
-	"väärinkäytöksiin.".
+	"henkilÃ¶tunnusta, etenkin sen loppuosaa, usein luullaan "
+	"erÃ¤Ã¤nlaiseksi \"salasanaksi\" vaikkapa pankkikorttiostoksia "
+	"tehdessÃ¤ tai terveyskeskuksessa asioidessa, mikÃ¤ johtaa helposti "
+	"vÃ¤Ã¤rinkÃ¤ytÃ¶ksiin.".
 
 
 %% ============================================================================
