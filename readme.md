@@ -1,17 +1,129 @@
 
-  
 # ErlGuten
 
-ErlGuten was created by Joe Armstrong and others (see the LICENSE file for details). It was not available
-in hex.pm, and I wanted to use it conveniently as a dependency in systems using rebar3 as the build tool.
+ErlGuten was created by Joe Armstrong and others (see the LICENSE file for details). It is a general
+typesetting system, and the most important functionality of it is generating PDF documents from Erlang
+code. ErlGuten is pure Erlang and is not dependent on any external tools.
 
-I forked it, made sure that ErlGuten can be compiled by the current Erlang version (some files used
-obsolete encoding and could not be built anymore) and fixed some other incompatibilities found by Dialyzer.
-This software is published in hex.pm. To use it add `erlguten` as a dependency in `rebar.config`.
+This fork of ErlGuten is maintained for the purpose of publishing it in Erlang package repository
+[hex.pm](https://hex.pm/packages/erlguten), for keeping it up to date with newer Erlang versions,
+creating more documentation, and making fixes and improvements.
+
+## Basic Usage
+
+The easiest way to start using ErlGuten is, if you are using rebar3, just to add
+`erlguten` as a dependency in `rebar.config`:
+
+```
+{deps,[
+  erlguten
+]}.
+```
+
+The following code is the minimum you need to create a one page PDF
+with calls to the pdf module.
+
+`PDF = eg_pdf:new(),`
+
+    To create a pdf into which to put content
+
+`eg_pdf:set_pagesize(PDF, a4),`
+
+    To set the page size of the PDF. Other choices are letter, legal, and lots of A and B  formats
+
+`eg_pdf:set_page(PDF, 1),`
+
+    To set the page you are working on
+
+`eg_pdf:set_font(PDF, "Victorias-Secret", 40),`
+
+   To set the font to use until told different
+
+`eg_pdf_lib:moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),`
+
+    To move to position (50,700) and place the "Hello Joe from Gutenberg" content
+
+`Serialised = eg_pdf:export(PDF),`
+
+    To create all the content of the pdf as a string in the term Serialised
+
+`file:write_file("../test/eg_test6.pdf", [Serialised]),`
+
+    To output the pdf content into a finished PDF file
+
+`eg_pdf:delete(PDF).`
+
+    To delete the PDF object and the PDF process.
+
+## Documentation
+
+You will find more documentation at [this link](https://hexdocs.pm/erlguten/).
+
+## Using Erlang in typography applications
+
+_(This is part of the original README)_
+
+ErlGuten.  is  a system  for  hiqh quality  typesetting,
+ErlGuten  is  free software.   ErlGuten  aims  to produce  typographic
+quality PDF directly from XML or from a program.
+
+The aim of ErlGuten is to produce high quality PDF from a layout
+language  or from  a program.   The ErlGuten  distribution  includes a
+programming  API, so  that Erlang  programs can  produce PDF  -  and a
+typesetting system for typesetting documents written in XML.
+
+The  name  ErlGuten  is chosen  because  the program  is
+written  in  Erlang  -  the  Guten part  is  a  reference  to
+Gutenberg the father of printing.
+
+ErlGuten is a  system for high quality typesetting,  so we take a
+great  deal  of   care  when  formatting  text,  a   large  number  of
+optimizations are  performed which improve the quality  of the printed
+text.  Many of these optimizations are usually only found in expensive
+professional type-setting programs.   We believe that WYSIWYG programs
+have  destroyed the fine  art of  typesetting -  ErlGuten is  a modest
+attempt to improve the situation.
+
+We have  chosen XML as the  input language for  it's wide appeal.
+XML provides only a thin abstraction layer over the typesetting system
+- so the adventurous  can use the programming interface  to ErlGuten -
+to directly  produce typographic quality PDF in  real-time.  We expect
+this facility  to be  useful for the  dynamic generation  of documents
+from web-servers.
+
+In  ErlGuten  we  take  the   view  that  the  highest  level  of
+abstraction  is  the layout  of  a  document  - we  are  very
+concerned  that the user  can specify  the exact  position of
+text on  the printed  page. At  the next level  of abstraction  we are
+concerned with the typefaces that are used to format different regions
+of the document.
+
+ErlGuten  is designed  for the  production of  large  and complex
+documents with  complex layout requirements,  like newspapers
+or  books.    In  ErlGuten  layout,   content,  and  document
+management  are  considered separate  issues.  Layout is  template
+based -  Content is  assumed to  be stored as  a large  number of
+documents in  a file  system or data  base, document  management is
+considered  as  a mapping  operation  which  takes  documents in  the
+content  data base  and  maps  them onto  templates  to produce  hight
+quality output.
+
+This  is normal text,  set 30  picas wide  in 12/14  Times Roman.
+Many   different   typefaces  can   be   used   within  a   paragraph.
+Emphasized text is set in Times-Italic.  Hyphenation uses the
+TeX hyphenation algorithm.  Any of  the 35 built-in PDF typefaces with
+the  same  point  size  can  be  mixed with  a  paragraph.   The  term
+{person,"Joe"} is  an Erlang term which  has been typeset
+in 12  point courier.  The  paragraph justification algorithm
+does  proper  kerning  so,  for  example, the  word  AWAY  is
+correctly kerned!  - line breaks  within a paragraph are selected by a
+sophisticated global optimization technique.
 
 ## Building
 
-ErlGuten uses rebar to build, it also has a Makefile wrapper around the rebar tasks.
+This and the next section is useful for developers who want to modify ErlGuten.
+
+ErlGuten uses rebar3 to build, it also has a Makefile wrapper around the rebar tasks.
 
 1. Clone repository
 2. Run `make`
@@ -76,101 +188,3 @@ It produces an output file that at first glance looks the same as the results fr
 `kd_test1`
 
 It produces a 1 page PDF. It is a commercial bill in Swedish for a recording, I think. It does a good job of including a graphic to show the vendor's logo. It looks interesting.
-
-## A Mininal PDF Construction
-
-The following code is the minimum you need to create a one page PDF
-with calls to the pdf module.
-
-`PDF = eg_pdf:new(),`
-
-    To create a pdf into which to put content
-
-`eg_pdf:set_pagesize(PDF,a4),`
-
-    To set the page size of the PDF. Other choices are letter, legal, and lots of A and B  formats
-
-`eg_pdf:set_page(PDF,1),`
-
-    To set the page you are working on
-
-`eg_pdf:set_font(PDF, "Victorias-Secret", 40),`
-
-   To set the font to use until told different
-
-`eg_pdf_lib:moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),`
-
-    To move to position (50,700) and place the "Hello Joe from Gutenberg" content
-
-`Serialised = eg_pdf:export(PDF),`
-
-    To create all the content of the pdf as a string in the term Serialised
-
-`file:write_file("../test/eg_test6.pdf",[Serialised]),`
-
-    To output the pdf content into a finished PDF file
-
-`eg_pdf:delete(PDF).`
-
-    To delete the PDF object and the PDF process.
-
-## Using Erlang in typography applications
-
-### Introduction
-
-ErlGuten.  is  a system  for  hiqh quality  typesetting,
-ErlGuten  is  free software.   ErlGuten  aims  to produce  typographic
-quality PDF directly from XML or from a program.
-
-The aim of ErlGuten is to produce high quality PDF from a layout
-language  or from  a program.   The ErlGuten  distribution  includes a
-programming  API, so  that Erlang  programs can  produce PDF  -  and a
-typesetting system for typesetting documents written in XML.
-
-The  name  ErlGuten  is chosen  because  the program  is
-written  in  Erlang  -  the  Guten part  is  a  reference  to
-Gutenberg the father of printing.
-
-ErlGuten is a  system for high quality typesetting,  so we take a
-great  deal  of   care  when  formatting  text,  a   large  number  of
-optimizations are  performed which improve the quality  of the printed
-text.  Many of these optimizations are usually only found in expensive
-professional type-setting programs.   We believe that WYSIWYG programs
-have  destroyed the fine  art of  typesetting -  ErlGuten is  a modest
-attempt to improve the situation.
-
-We have  chosen XML as the  input language for  it's wide appeal.
-XML provides only a thin abstraction layer over the typesetting system
-- so the adventurous  can use the programming interface  to ErlGuten -
-to directly  produce typographic quality PDF in  real-time.  We expect
-this facility  to be  useful for the  dynamic generation  of documents
-from web-servers.
-
-In  ErlGuten  we  take  the   view  that  the  highest  level  of
-abstraction  is  the layout  of  a  document  - we  are  very
-concerned  that the user  can specify  the exact  position of
-text on  the printed  page. At  the next level  of abstraction  we are
-concerned with the typefaces that are used to format different regions
-of the document.
-
-ErlGuten  is designed  for the  production of  large  and complex
-documents with  complex layout requirements,  like newspapers
-or  books.    In  ErlGuten  layout,   content,  and  document
-management  are  considered separate  issues.  Layout is  template
-based -  Content is  assumed to  be stored as  a large  number of
-documents in  a file  system or data  base, document  management is
-considered  as  a mapping  operation  which  takes  documents in  the
-content  data base  and  maps  them onto  templates  to produce  hight
-quality output.
-
-This  is normal text,  set 30  picas wide  in 12/14  Times Roman.
-Many   different   typefaces  can   be   used   within  a   paragraph.
-Emphasized text is set in Times-Italic.  Hyphenation uses the
-TeX hyphenation algorithm.  Any of  the 35 built-in PDF typefaces with
-the  same  point  size  can  be  mixed with  a  paragraph.   The  term
-{person,"Joe"} is  an Erlang term which  has been typeset
-in 12  point courier.  The  paragraph justification algorithm
-does  proper  kerning  so,  for  example, the  word  AWAY  is
-correctly kerned!  - line breaks  within a paragraph are selected by a
-sophisticated global optimization technique.
-
