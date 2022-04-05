@@ -20,3 +20,11 @@ eg_test9.pdf
 eg_test11.pdf
 kd_test1.pdf
 process.pdf
+doc/eg_*.html
+doc/edoc-info
+doc/erlang.png
+doc/erlguten.html
+doc/index.html
+doc/modules-frame.html
+doc/overview-summary.html
+doc/stylesheet.css
