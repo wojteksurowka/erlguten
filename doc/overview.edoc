@@ -10,10 +10,10 @@
 @author Mikael Karlsson
 @author Johan Bevemyr
 @author Sean Hinde
-@author Håkan Stenholm
+@author HÃ¥kan Stenholm
 @author Carl Wright
 @copyright 2003-2012 Joe Armstrong, Mikael Karlsson, Johan Bevemyr,
-Sean Hinde, Håkan Stenholm, Carl Wright
+Sean Hinde, HÃ¥kan Stenholm, Carl Wright
 @version {@version}
 
 @doc <img src="../doc/NextGenErlguten_logo.png" width="537" height="88"></img><br/> NGerlGuten is a typesetting system for producing PDF from XML.
@@ -29,6 +29,10 @@ NGerlGuten text justification algorithms produce paragraph-optimized text with
 fully kerned data, normally the production of such text cannot be done by
 everyday word-processing programs but requires the use of dedicated
 typesetting programs.
+
+== Functions Map ==
+
+<a href="./pdf functions map.pdf">PDF Functions Map</a>
 
 == Gallery ==
 
