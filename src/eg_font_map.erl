@@ -1,3 +1,4 @@
+%% @private
 -module(eg_font_map).
 -export([handler/1,all_fonts/0]).
 handler("Courier-BoldOblique")-> eg_font_1;

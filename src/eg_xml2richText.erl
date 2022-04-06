@@ -22,6 +22,7 @@
 %%
 %% Author: Joe Armstrong <joe@sics.se>
 %%==========================================================================
+%% @private
 
 -module(eg_xml2richText).
 

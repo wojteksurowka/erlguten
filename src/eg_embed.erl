@@ -23,6 +23,7 @@
 %% Author: Joe Armstrong <joe@sics.se>
 %% Purpose: Font embedding code
 %%==========================================================================
+%% @private
 
 -module(eg_embed).
 

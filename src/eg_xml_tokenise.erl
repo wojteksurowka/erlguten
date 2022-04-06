@@ -23,6 +23,7 @@
 %% Author: Joe Armstrong <joe@sics.se>
 %% Purpose: XML tokeniser
 %%==========================================================================
+%% @private
 
 -module(eg_xml_tokenise).
 

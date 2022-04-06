@@ -82,6 +82,7 @@
 %% </dl>
 %% </p>
 %% @end
+%% @private
 
 -module(eg_pdf_page).
 

@@ -23,6 +23,7 @@
 %% Author: Joe Armstrong <joe@sics.se>
 %% Purpose: Line breaking algorithm
 %%==========================================================================
+%% @private
 
 -module(eg_line_break).
 

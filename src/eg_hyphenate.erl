@@ -23,6 +23,7 @@
 %% Author: Joe Armstrong <joe@sics.se>
 %% Purpose: Hyphenation program - adapted from TeX
 %%==========================================================================
+%% @private
 
 -module(eg_hyphenate).
 

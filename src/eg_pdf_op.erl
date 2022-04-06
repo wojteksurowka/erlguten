@@ -24,6 +24,7 @@
 %%            Mikael Karlsson <mikael.karlsson@creado.com>
 %% Purpose: PDF content stream operators
 %%==========================================================================
+%% @private
 
 -module(eg_pdf_op).
 

@@ -23,6 +23,7 @@
 %% Authors:   Joe Armstrong <joe@sics.se>
 %% Purpose: Main program
 %%==========================================================================
+%% @private
 
 -module(erlguten).
 

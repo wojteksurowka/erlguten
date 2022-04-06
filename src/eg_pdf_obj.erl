@@ -32,6 +32,7 @@
 %% <p> </p>
 %% 
 %% @end
+%% @private
 
 -module(eg_pdf_obj).
 

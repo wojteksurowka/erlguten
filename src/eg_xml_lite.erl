@@ -23,6 +23,7 @@
 %% Authors: Joe Armstrong <joe@sics.se>
 %% Purpose: XML parser
 %%==========================================================================
+%% @private
 
 -module(eg_xml_lite).
 

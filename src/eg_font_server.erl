@@ -22,6 +22,7 @@
 %%
 %% Authors:   Joe Armstrong <joe@sics.se>
 %%==========================================================================
+%% @private
 
 -module(eg_font_server).
 

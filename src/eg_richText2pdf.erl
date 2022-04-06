@@ -23,6 +23,7 @@
 %% Author: Joe Armstrong <joe@sics.se>
 %% Purpose: Convert internal form of line to PDF
 %%==========================================================================
+%% @private
 
 -module(eg_richText2pdf).
 

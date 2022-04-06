@@ -25,6 +25,7 @@
 %%           Carl Wright <wright@servicelevel.net>
 %% Purpose: Import images to PDF
 %%==========================================================================
+%% @private
 
 -module(eg_pdf_image).
 

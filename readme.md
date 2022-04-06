@@ -39,11 +39,11 @@ with calls to the pdf module.
 
    To set the font to use until told different
 
-`eg_pdf_lib:moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),`
+`eg_pdf:moveAndShow(PDF, 50, 700, "Hello Joe from Gutenburg"),`
 
     To move to position (50,700) and place the "Hello Joe from Gutenberg" content
 
-`Serialised = eg_pdf:export(PDF),`
+`{Serialised, PageNo} = eg_pdf:export(PDF),`
 
     To create all the content of the pdf as a string in the term Serialised
 
@@ -103,11 +103,7 @@ documents with  complex layout requirements,  like newspapers
 or  books.    In  ErlGuten  layout,   content,  and  document
 management  are  considered separate  issues.  Layout is  template
 based -  Content is  assumed to  be stored as  a large  number of
-documents in  a file  system or data  base, document  management is
-considered  as  a mapping  operation  which  takes  documents in  the
-content  data base  and  maps  them onto  templates  to produce  hight
-quality output.
-
+documents in  a file  system or data  base, documoveAndShow
 This  is normal text,  set 30  picas wide  in 12/14  Times Roman.
 Many   different   typefaces  can   be   used   within  a   paragraph.
 Emphasized text is set in Times-Italic.  Hyphenation uses the

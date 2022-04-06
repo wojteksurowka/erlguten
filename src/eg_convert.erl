@@ -22,6 +22,7 @@
 %%
 %% Author: Johan Bevemyr <jb@son.bevemyr.com>
 %%==========================================================================
+%% @private
 
 -module(eg_convert).
 

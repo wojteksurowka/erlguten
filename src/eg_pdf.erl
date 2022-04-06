@@ -103,9 +103,12 @@
 	 xref/2
         ]).
 
+-export_type([pdf/0, pdf_string/0, pagesize/0]).
+-opaque pdf() :: pid().
+-type pdf_string() :: [] | [char() | pdf_string()] | [pdf_string() | pdf_string()].
+-type pagesize() :: a0|a1|a2|a3|a4|a5|a6|a7|a8|a9|b0|b1|b2|b3|b4|b5|b6|b7|b8|b9|b10|c5e|comm10e|dle|executive|folio|ledger|legal|letter|tabloid.
 
 %% Set up Info, Catalog and Pages
-
 init_pdf_context()->
     {{Year,Month,Day},{Hrs,Min,Sec}} = calendar:local_time(),
     #pdfContext{info=#info{creator="Erlang", 
@@ -122,93 +125,82 @@ init_pdf_context()->
 
 %% --------------------- User functions --------------
 
-%% @doc Spawn pdf building process
+%-spec new() -> pdf().
+%% @doc Initiate PDF building process, returns a handle to use in other functions
 new()->
-    io:format("New pdf~n",[]),
+    %io:format("New pdf~n",[]),
     {ok, PDF} = start_link( [init_pdf_context(), <<>>] ),
     PDF.
 
-%% @doc Export to PDF file format 
-%% return: {PDFDoc::binary(), PageNo::integer()} | exit(Reason)
-export(PID)->
-  case gen_server:call(PID, {export}, infinity) of
+%% @doc This returns a tuple with {binary with PDF contents, page count}.
+%% return: {PDFDoc::binary(), PageCount::integer()} | exit(Reason)
+export(PDF)->
+  case gen_server:call(PDF, {export}, infinity) of
   	{export, PDFDoc, PageNo}->
   	    {PDFDoc, PageNo};
-  	{'EXIT', PID, Reason} ->
+  	{'EXIT', PDF, Reason} ->
   	    exit(Reason)
   end.
 
-%% @doc clear up - delete pdf building process
-delete(PID)->
-    gen_server:cast(PID,{delete}).
+%-spec delete(pdf()) -> ok.
+%% @doc Clear up - use it clean resources used to generate PDF
+delete(PDF)->
+    gen_server:cast(PDF,{delete}).
 
 %% @doc return the state of the server
 
-get_state(PID) ->
-  gen_server:call(PID, {get_state}).
+get_state(PDF) ->
+  gen_server:call(PDF, {get_state}).
 
-%% @doc Add current page context to PDF document and start on a new page 
+%% @doc Add current page context to PDF document and start on a new page.
 %% Note page 1 is already created  by default and  current page set 
 %% to it after creation of PDF context.
-new_page(PID)->
-   case gen_server:call( PID, {get_new_page}, infinity) of
+new_page(PDF)->
+   case gen_server:call( PDF, {get_new_page}, infinity) of
     	{page,PageNo}->
     	    PageNo;
-    	{'EXIT', PID, Reason} ->
+    	{'EXIT', PDF, Reason} ->
     	    exit(Reason)
     end.
 
+%% @private
+page_script(PDF, Script) ->
+    gen_server:cast(PDF, {page_script, Script}).
 
+%% @doc Go to a page already created.
+set_page(PDF, PageNo)->
+    gen_server:cast(PDF, {page,{set, PageNo}}).
 
-page_script(PID, Script) ->
-    gen_server:cast(PID, {page_script, Script}).
-
-
-%% @doc Go to a page already created.    
-set_page(PID, PageNo)->
-    gen_server:cast(PID, {page,{set, PageNo}}).
-
-%% @doc Useful for page numbering functions etc.
-get_page_no(PID)->
-   case gen_server:call( PID, {get_page_no}, infinity) of
+%% @doc Current page number.
+get_page_no(PDF)->
+   case gen_server:call( PDF, {get_page_no}, infinity) of
     	{page,PageNo}->
     	    PageNo;
-    	{'EXIT', PID, Reason} ->
+    	{'EXIT', PDF, Reason} ->
     	    exit(Reason)
     end.
     
-%% --- Info -----
-%% @doc set the Author atribute of the PDF
-
-set_author(PID,Author)->
-      gen_server:cast(PID, {info, {author, Author}} ).
+%% @doc set the Author atribute of the PDF.
+set_author(PDF,Author)->
+      gen_server:cast(PDF, {info, {author, Author}} ).
       
-%% @doc set the Title atribute of the PDF
-
-set_title(PID,Title)->
-    gen_server:cast(PID, {info, {title, Title}} ).
+%% @doc Set the Title attribute of the PDF file.
+set_title(PDF,Title)->
+    gen_server:cast(PDF, {info, {title, Title}} ).
       
-%% @doc set the Subject atribute of the PDF
-
-set_subject(PID,Subject)->
-    gen_server:cast(PID, {info, {subject, Subject}} ).
+%% @doc This sets the value of the SUbject attribute of the PDF file.
+set_subject(PDF,Subject)->
+    gen_server:cast(PDF, {info, {subject, Subject}} ).
       
 %% @doc set the Date atribute of the PDF 
-   
-set_date(PID,Year,Month,Day)->
-    gen_server:cast(PID, {info, {date, {Year,Month,Day}}} ).
+set_date(PDF,Year,Month,Day)->
+    gen_server:cast(PDF, {info, {date, {Year,Month,Day}}} ).
       
-%% @doc set the Keywords atribute of the PDF 
-   
-set_keywords(PID, Keywords)->
-    gen_server:cast(PID, {info, {keywords, Keywords}} ).
+%% @doc This sets the values in the Keyword attribute of the PDF file. 
+set_keywords(PDF, Keywords)->
+    gen_server:cast(PDF, {info, {keywords, Keywords}} ).
 
-
-
-%% --- Page ---
-
-%% @doc pagesize returns: bounding box {Xleft, Ybottom, Xright, Ytop}
-%%         full pages are always = {0, 0, Width, Height}
+%% @doc pagesize Returns bounding box of the page as {0, 0, Width, Height}.
 pagesize(a0)             -> pagesize( 2380, 3368 );
 pagesize(a1)             -> pagesize( 1684, 2380 );
 pagesize(a2)             -> pagesize( 1190, 1684 );
@@ -240,29 +232,33 @@ pagesize(legal)          -> pagesize( 612, 1008 );
 pagesize(letter)         -> pagesize( 612, 792 );
 pagesize(tabloid)        -> pagesize( 792, 1224 ).
 
-%% create a full page bounding box for a page of size Width x Height
+%% @private
 pagesize(Width, Height) -> {0,0,Width,Height}.
 
-set_pagesize(PID, Size)-> 
-  gen_server:cast(PID, {mediabox, pagesize(Size) }).
+%-spec set_pagesize(pdf(), pagesize()) -> ok.
+%% @doc Set the page size.
+%% Popular formats are represented as atoms like <code>a4</code> or <code>letter</code>
+set_pagesize(PDF, Size)-> 
+  gen_server:cast(PDF, {mediabox, pagesize(Size) }).
 
+%-spec set_pagesize(pdf(), number(), number()) -> ok.
+%% @doc Set the page size with explicit width and height
+set_pagesize(PDF, Width, Height) -> 
+  gen_server:cast(PDF, {mediabox, pagesize(Width, Height) }).
 
-set_pagesize(PID, Width, Height) -> 
-  gen_server:cast(PID, {mediabox, pagesize(Width, Height) }).
+%% @doc This set the font and the font size of the graphics state for the present content stream (Typically, a text object).
+set_font(PDF, Fontname, Size)->
+    gen_server:cast(PDF, {font, {set, Fontname, Size}}).
 
-%% -- Fonts --
+%% @private
+ensure_font_gets_loaded(PDF, FontName) ->
+    gen_server:cast(PDF, {ensure_font, FontName}).
 
-set_font(PID, Fontname, Size)->
-    gen_server:cast(PID, {font, {set, Fontname, Size}}).
+%% @doc This calculates the length in points of the String stroked in FontName of size FontSize.
+get_string_width(_PDF, Fontname, FontSize, Str)->
+    get_string_width(Fontname, FontSize, Str).
 
-ensure_font_gets_loaded(PID, FontName) ->
-    gen_server:cast(PID, {ensure_font, FontName}).
-
-
-%% -- This function is a bit expensive, but will stick to the public interface.
-get_string_width(_PID, Fontname, PointSize, Str)->
-    get_string_width(Fontname, PointSize, Str).
-
+%% @doc This calculates the length in points of the String stroked in FontName
 get_string_width(Fontname, PointSize, Str)->
     {richText, Inline} = eg_richText:str2richText(Fontname, PointSize, 
 						  0, default, true, Str),
@@ -271,12 +267,16 @@ get_string_width(Fontname, PointSize, Str)->
 
 %% units of measure
 
+%% @private
 points(X) -> X.
+%% @private
 picas(X) -> X * 6.
+%% @private
 inches(X) -> round(X * 72.21).
+%% @private
 cms(X) -> round((X * 72.21) / 2.54).
 
-%% @spec color(Color::atom() | {R,G,B}) -> {R,G,B}
+%% -spec color(Color::atom() | {R,G,B}) -> {R,G,B}
 %% @doc  R,G,B = 0-255
 %%
 %%      This may be useful to lookup the rgb value of the color names 
@@ -285,269 +285,366 @@ color(Color) ->
 
 %% Text
 
-begin_text(PID)-> append_stream(PID, eg_pdf_op:begin_text() ).
+%-spec begin_text(pdf()) -> ok.
+%% @doc This begins a text object in a PDF.
+begin_text(PDF)-> append_stream(PDF, eg_pdf_op:begin_text() ).
     
-end_text(PID)  -> append_stream(PID, eg_pdf_op:end_text() ).
+%-spec end_text(pdf()) -> ok.
+%% @doc This ends a text object in a PDF.
+end_text(PDF)  -> append_stream(PDF, eg_pdf_op:end_text() ).
      
-break_text(PID)-> append_stream(PID, eg_pdf_op:break_text() ).
+%-spec break_text(pdf()) -> ok.
+%% @doc Breaks line in a text
+break_text(PDF)-> append_stream(PDF, eg_pdf_op:break_text() ).
     
-text(PID, Text) ->  append_stream(PID, eg_pdf_op:text(Text) ).
+%-spec text(pdf(), pdf_string()) -> ok.
+%% @doc This inserts the content of the String into the PDF using the graphics state and font information set at the time.
+text(PDF, Text) ->  append_stream(PDF, eg_pdf_op:text(Text) ).
 
-textbr(PID,Text)-> append_stream(PID, eg_pdf_op:textbr(Text) ).
-    
-kernedtext(PID, Text)-> append_stream(PID, eg_pdf_op:kernedtext(Text) ).
+%% @doc This inserts the content of the String into the text object using the graphics state and font information set at the time.
+%% It also ends the line (breaks) and starts a new one.
+textbr(PDF,Text)-> append_stream(PDF, eg_pdf_op:textbr(Text) ).
 
-set_text_pos(PID, X, Y)->  append_stream(PID, eg_pdf_op:set_text_pos(X,Y)).
+%% @doc This allows precise kerning of the text in the TextList.
+%% It has a format like ["A", 120, "W", 120, "A", 95, "Y"].
+%% The numbers between the letters adjust the distance between the letters.
+%% The unit of measure is thousandths of a unit of text space.
+%% You can have strings or single letters between the numbers.
+ 
+kernedtext(PDF, Text)-> append_stream(PDF, eg_pdf_op:kernedtext(Text) ).
+
+%% @doc This sets the start position to begin painting text (glyphs).
+set_text_pos(PDF, X, Y)->  append_stream(PDF, eg_pdf_op:set_text_pos(X,Y)).
 		      
-set_text_leading(PID, L)-> append_stream( PID, eg_pdf_op:set_text_leading(L) ).
+%% @doc This sets the distance between the baselines of adjacent lines of text.
+set_text_leading(PDF, L)-> append_stream( PDF, eg_pdf_op:set_text_leading(L) ).
 
+%% @doc This sets the text rendering mode parameter.
+%% This determines whether showing text causes the glyph outlines to be
+%% stroked, filled, used a a clipping boundary or a combination of the previous.
+set_text_rendering(PDF, MODE) ->
+    append_stream(PDF, eg_pdf_op:set_text_rendering(MODE) ).
 
-set_text_rendering(PID, MODE) ->
-    append_stream(PID, eg_pdf_op:set_text_rendering(MODE) ).
-
-
-set_char_space(PID, CS) -> append_stream(PID, eg_pdf_op:set_char_space(CS) ).
+%% @private
+set_char_space(PDF, CS) -> append_stream(PDF, eg_pdf_op:set_char_space(CS) ).
     
-set_word_space(PID, WS) -> append_stream(PID, eg_pdf_op:set_word_space(WS) ).
+%% @doc This changes the size of a space character.
+%% In horizontal writing a positive value increases the length of a space
+%% and a negative one reduces it. In vertical writing, the effect is reversed. 
+set_word_space(PDF, WS) -> append_stream(PDF, eg_pdf_op:set_word_space(WS) ).
 
-set_text_scale(PID, SC) -> append_stream(PID, eg_pdf_op:set_text_scale(SC) ).
+%% @doc This sets the horizaontal scaling of the following glyphs. 100% is normal. 50% makes them half as wide.
+set_text_scale(PDF, SC) -> append_stream(PDF, eg_pdf_op:set_text_scale(SC) ).
 
-set_text_rise(PID, RISE)-> append_stream(PID, eg_pdf_op:set_text_rise(RISE)).
+%% @doc This attribute raises or lowers the baseline for the following text.
+set_text_rise(PDF, RISE)-> append_stream(PDF, eg_pdf_op:set_text_rise(RISE)).
 
-
-%% Graphics operators
-path(PID, Type) -> append_stream(PID, eg_pdf_op:path(Type)).
+%% @doc This indicates how to process the current path.
+%% StrokeType can be close, stroke, close_stroke, fill, fill_even_odd,
+%% fill_stroke, fill_then_stroke, fill_stroke_even_odd, close_fill_stroke,
+%% close_fill_stroke_even_odd, or endpath.
+path(PDF, StrokeType) -> append_stream(PDF, eg_pdf_op:path(StrokeType)).
     
-move_to(PID,P)-> append_stream(PID, eg_pdf_op:move_to(P) ).
+%% @doc This begins a new subpath by moving to the X,Y coordinates with no connecting line segment.
+-spec move_to(any(), P::{X::number(), Y::number()}) -> ok.
+move_to(PDF,P)-> append_stream(PDF, eg_pdf_op:move_to(P) ).
 
-line(PID,From_To)          ->  append_stream(PID, eg_pdf_op:line(From_To) ).
-line(PID, From, To)        -> line(PID,{From, To}).
-line(PID, X1, Y1, X2, Y2 ) -> line(PID, {{X1,Y1},{X2,Y2}}).
+%% @doc This draws a lines from X1, Y1 to X2, Y2.
+%% The line shape, color, etc. is defined by the graphics state.
+-spec line(any(), FromTo::{{X1::number(), Y1::number()}, {X2::number(), Y2::number()}}) -> ok.
+line(PDF,FromTo) ->  append_stream(PDF, eg_pdf_op:line(FromTo) ).
 
-lines(PID, LineList)->  append_stream(PID, eg_pdf_op:lines(LineList)).
+%% @doc This draws a lines from X1, Y1 to X2, Y2.
+%% The line shape, color, etc. is defined by the graphics state.
+-spec line(any(), From::{X1::number(), Y1::number()}, To::{X2::number(), Y2::number()}) -> ok.
+line(PDF, From, To)        -> line(PDF,{From, To}).
 
-%% Poly paths should be stroked/closed/filled with separate
-%% command.
+%% @doc This draws a lines from X1, Y1 to X2, Y2.
+%% The line shape, color, etc. is defined by the graphics state.
+-spec line(any(), X1::number(), Y1::number(), X2::number(), Y2::number()) -> ok.
+line(PDF, X1, Y1, X2, Y2 ) -> line(PDF, {{X1,Y1},{X2,Y2}}).
 
-poly(PID,Points)->  append_stream(PID, eg_pdf_op:poly(Points)).
+%% @doc This draws a list of lines.
+%% The LineList has entries of values like those needed for the line function.
+lines(PDF, LineList)->  append_stream(PDF, eg_pdf_op:lines(LineList)).
 
+%% @doc This creates a path starting at the first Point and then to each following Point.
+%% Each Point in the Points lis tis a tuple {X,Y}.
+%% Poly paths should be stroked/closed/filled with a separate command.
+poly(PDF,Points)->  append_stream(PDF, eg_pdf_op:poly(Points)).
 
-%% Grid assumes sorted XLists and YList, minimum value first
-grid(PID,XList,YList)->  append_stream(PID, eg_pdf_op:grid(XList,YList)).
+%% @doc Creates a grid.
+%% Grid assumes sorted XList and YList, minimum value first.
+grid(PDF,XList,YList)->  append_stream(PDF, eg_pdf_op:grid(XList,YList)).
 
-%% Bezier paths should be stroked/closed/filled with separate
-%% command.
-
-
-%% @doc bezier/5 (PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}) <br/><br/>
-%%   This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
-
-bezier(PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})->
-    append_stream(PID, eg_pdf_op:bezier({X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})).
+%% @doc Create a cubic Bezier curve.
+%% This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points.
+%% Bezier paths should be stroked/closed/filled with a separate command.
+-spec bezier(any(), P1::{X1::number(), Y1::number()}, P2::{X2::number(), Y2::number()}, P3::{X3::number(), Y3::number()}, P4::{X4::number(), Y4::number()}) -> ok.
+bezier(PDF,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})->
+    append_stream(PDF, eg_pdf_op:bezier({X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4})).
     
-%% @doc bezier/9 (PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4) <br/><br/>
-%% This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+%% @doc Create a cubic Bezier curve.
+%% This moves to X1,Y1 point as its start and then creates a cubic Bezier curve to X4,Y4 using the points in between as the control points.
+%% Bezier paths should be stroked/closed/filled with a separate command.
 
-bezier(PID,X1,Y1,X2,Y2,X3,Y3,X4,Y4)->
-    bezier(PID,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}).
+bezier(PDF,X1,Y1,X2,Y2,X3,Y3,X4,Y4)->
+    bezier(PDF,{X1,Y1},{X2,Y2},{X3,Y3},{X4,Y4}).
     
-%% @doc bezier_c/4 (PID,{X1,Y1},{X2,Y2},{X3,Y3}) <br/><br/>
-%% This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the points in between as the control points. Bezier paths should be stroked/closed/filled with a separate command.
+%% @doc Create a cubic Bezier curve.
+%% This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the points in between as the control points.
+%% Bezier paths should be stroked/closed/filled with a separate command.
 
-bezier_c(PID,Point1,Point2,Point3)->
-    append_stream(PID, eg_pdf_op:bezier_c(Point1,Point2,Point3)).
+bezier_c(PDF,Point1,Point2,Point3)->
+    append_stream(PDF, eg_pdf_op:bezier_c(Point1,Point2,Point3)).
 
-%% @doc bezier_v/3 (PID,{X1,Y1},{X2,Y2} ) <br/><br/>
+%% @doc Create a cubic Bezier curve.
 %% This takes the current point as its start and then creates a cubic Bezier curve to Point2 using the current point and Point1 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
-bezier_v(PID, Point1, Point2 )->
-    append_stream(PID, eg_pdf_op:bezier_v(Point1, Point2)).
+bezier_v(PDF, Point1, Point2 )->
+    append_stream(PDF, eg_pdf_op:bezier_v(Point1, Point2)).
 
-%% @doc bezier_y/3  (PID, {X1,Y1},{X3,Y3}) <br/><br/>
+%% @doc Create a cubic Bezier curve.
 %% This takes the current point as its start and then creates a cubic Bezier curve to Point3 using the Point1 and Point3 as the control points. Bezier paths should be stroked/closed/filled with a separate command.
 
-bezier_y(PID, Point1, Point3)->
-    append_stream(PID, eg_pdf_op:bezier_y(Point1, Point3)).
+bezier_y(PDF, Point1, Point3)->
+    append_stream(PDF, eg_pdf_op:bezier_y(Point1, Point3)).
 
+%% @doc This strokes a circle centered at X, Y with a radius of R.
+-spec circle(any(), C::{X::number(), Y::number()}, R::number()) -> ok.
+circle(PDF, {X,Y}, R)->
+    append_stream(PDF, eg_pdf_op:circle( {X,Y}, R)).
 
+%% @doc This strokes an ellipse centered at X,Y with an X-radius of RX and a Y-radius of RY.
+%% Creates an ellipse with center in X, Y and radiuses RX, RY. Ellipses should be stroked/closed/filled with a separate command.
+-spec ellipse(any(), C::{X::number(), Y::number()}, R::{RX::number(), RY::number()}) -> ok.
+ellipse(PDF, {X, Y}, {RX, RY})->
+    append_stream(PDF, eg_pdf_op:ellipse({X, Y}, {RX, RY})).
 
-circle(PID, {X,Y}, R)->
-    append_stream(PID, eg_pdf_op:circle( {X,Y}, R)).
+%% @doc This creates a rectanglar path whose basepoint is X,Y and whose dimensions are WX, WY.
+%% It is drawn according to the selected StrokeType.
+%% You need to call path/2 to stroke the path.
+-spec rectangle(any(), P::{X::number(), Y::number()}, S::{WX::number(), WY::number()}) -> ok.
+rectangle(PDF,{X,Y},{WX,WY}) ->
+    rectangle(PDF,X,Y,WX,WY).
 
-ellipse(PID, {X, Y}, {RX, RY})->
-    append_stream(PID, eg_pdf_op:ellipse({X, Y}, {RX, RY})).
+%% @doc This creates a rectanglar path whose basepoint is X,Y and whose dimensions are WX, WY.
+%% It is drawn according to the selected StrokeType.
+-spec rectangle(any(), P::{X::number(), Y::number()}, S::{WX::number(), WY::number()}, any()) -> ok.
+rectangle(PDF,{X,Y},{WX,WY}, StrokeType) ->
+    rectangle(PDF,X,Y,WX,WY,StrokeType).
 
+%% @doc This creates a rectanglar path whose basepoint is X,Y and whose dimensions are WX, WY.
+%% It is drawn according to the selected StrokeType.
+%% You need to call path/2 to stroke the path.
+-spec rectangle(any(), X::number(), Y::number(), WX::number(), WY::number()) -> ok.
+rectangle(PDF,X,Y,WX,WY) when is_pid(PDF) ->
+    append_stream(PDF, eg_pdf_op:rectangle(X,Y,WX,WY)).
 
-%% @doc Stroke a rectangle area.
-%% If Stroke Type is not appended in arguments, explicit
-%% stroke command "path(StrokeType)" has to be executed.
-%%
-%% X, Y designate the lower left corner of the rectangle.
+%% @doc This creates a rectanglar path whose basepoint is X,Y and whose dimensions are WX, WY.
+%% It is drawn according to the selected StrokeType.
+%% If don't use the verson with StrokeType, you need to call path/2 to stroke the path.
+-spec rectangle(any(), X::number(), Y::number(), WX::number(), WY::number(), any()) -> ok.
+rectangle(PDF,X,Y,WX,WY,StrokeType) ->
+    append_stream(PDF, eg_pdf_op:rectangle(X,Y,WX,WY,StrokeType)).
 
+%% @doc This draws a rounded rectangle path.
+%% Its base is at X,Y and it has a size of W by H. The corner radius is Radius.
+-spec round_rect(any(), P::{X::number(), Y::number()}, S::{W::number(), H::number()}, Radius::number()) -> ok.
+round_rect(PDF, Point, Size, Radius)->
+    append_stream(PDF, eg_pdf_op:round_rect(Point, Size, Radius)).
 
-rectangle(PID,{X,Y},{WX,WY}) ->
-    rectangle(PID,X,Y,WX,WY).
+%% @doc This draws a rounded rectangle path with only the top corners rounded.
+%% Its base is at X,Y and it has a size of W by H. The corner radius is Radius.
+-spec round_top_rect(any(), P::{X::number(), Y::number()}, S::{W::number(), H::number()}, Radius::number()) -> ok.
+round_top_rect(PDF, Point, Size, Radius)->
+    append_stream(PDF, eg_pdf_op:round_top_rect(Point, Size, Radius)).
 
-rectangle(PID,{X,Y},{WX,WY}, StrokeType) ->
-    rectangle(PID,X,Y,WX,WY,StrokeType).
+%% @doc This sets the graphics state so that the width of lines stroked match the width.
+set_line_width(PDF,W)->
+    append_stream(PDF, eg_pdf_op:set_line_width(W)).
 
-rectangle(PID,X,Y,WX,WY) when is_pid(PID) ->
-    append_stream(PID, eg_pdf_op:rectangle(X,Y,WX,WY)).
+%% @doc This changes the graphics state so that the ends of open subpaths and dashes are shaped as "flat_cap", "round_cap" or "square_cap".
+set_line_cap(PDF,Mode)->
+    append_stream(PDF, eg_pdf_op:set_line_cap(Mode)).    
 
-rectangle(PID,X,Y,WX,WY,Option) ->
-    append_stream(PID, eg_pdf_op:rectangle(X,Y,WX,WY,Option)).
+%% @doc This changes the graphics state so that consecutive segments of a path that connect at angles are styled as "miter_join", "round_join" or "bevel_join".
+set_line_join(PDF, Mode)->
+    append_stream(PDF, eg_pdf_op:set_line_join(Mode)).    
 
-round_rect(PID, Point, Size, Radius)->
-    append_stream(PID, eg_pdf_op:round_rect(Point, Size, Radius)).
+%% @private
+set_miter_limit(PDF,Limit)->
+    append_stream(PDF, eg_pdf_op:set_miter_limit(Limit)).
 
+%% @doc Selects the stroke style for lines.
+%% This changes the graphics state so that lines stroked are "solid", "dash", "dot" or "dashdot".
+%% You specify other patterns with a list of numbers expressing the pattern.
+set_dash(PDF, Mode) -> 
+    append_stream(PDF, eg_pdf_op:set_dash(Mode)).
 
-round_top_rect(PID, Point, Size, Radius)->
-    append_stream(PID, eg_pdf_op:round_top_rect(Point, Size, Radius)).
+%% @private
+set_dash(PDF, Array, Phase)-> 
+    append_stream(PDF, eg_pdf_op:set_dash(Array, Phase)).
 
+%% @doc This saves the graphics state on the graphics state stack.
+save_state(PDF)->
+    append_stream(PDF, eg_pdf_op:save_state() ).
 
-%% Line styles
-set_line_width(PID,W)->
-    append_stream(PID, eg_pdf_op:set_line_width(W)).
+%% @doc This restores the graphics state off the graphics state stack.    
+restore_state(PDF)->
+    append_stream(PDF, eg_pdf_op:restore_state() ).
 
-set_line_cap(PID,Mode)->
-    append_stream(PID, eg_pdf_op:set_line_cap(Mode)).    
-
-set_line_join(PID, Mode)->
-    append_stream(PID, eg_pdf_op:set_line_join(Mode)).    
-
-set_miter_limit(PID,Limit)->
-    append_stream(PID, eg_pdf_op:set_miter_limit(Limit)).
-        
-
-set_dash(PID, Mode) -> 
-    append_stream(PID, eg_pdf_op:set_dash(Mode)).
-
-set_dash(PID, Array, Phase)-> 
-    append_stream(PID, eg_pdf_op:set_dash(Array, Phase)).
-
-%% Graphics state
-save_state(PID)->
-    append_stream(PID, eg_pdf_op:save_state() ).
+%% @doc This A through F sequence of numbers represents any linear transformation
+%% from one coordinate system to another for graphics.
+%% You can "translate", "rotate", "scale" and "skew" all in one step. Hold on to your horses!
+transform(PDF, A, B, C, D, E, F)->
+    append_stream(PDF, eg_pdf_op:transform(A, B, C, D, E, F)).
     
-restore_state(PID)->
-    append_stream(PID, eg_pdf_op:restore_state() ).
+%% @doc This A through F sequence of numbers represents any linear transformation
+%% from one coordinate system to another for text.
+%% You can "translate", "rotate", "scale" and "skew" all in one step. Hold on to your horses!
+text_transform(PDF, A, B, C, D, E, F)->
+    append_stream(PDF, eg_pdf_op:text_transform(A, B, C, D, E, F)).
 
-%% Change geometry
-transform(PID, A, B, C, D, E, F)->
-    append_stream(PID, eg_pdf_op:transform(A, B, C, D, E, F)).
+%% @doc This translates the origin of the coordinate systems in the horizon and vertical dimension respectively.
+translate(PDF, X, Y)->
+    append_stream(PDF, eg_pdf_op:translate(X,Y)).
+
+%% @doc This changes the size of the text object in the X and Y directions.
+scale(PDF, ScaleX, ScaleY) when is_integer(ScaleX), is_integer(ScaleY)->
+    append_stream(PDF, eg_pdf_op:scale(ScaleX, ScaleY)).
+
+%% @doc Uses the angle given to rotate the graphics coordinate space.
+%% Usually you save_state before and restore_state afterwards. 
+rotate(PDF, Angle)->
+    append_stream(PDF, eg_pdf_op:rotate(Angle)).
+
+%% @doc Uses the angle given to rotate the text (not graphic) coordinate space.
+%% Usually you save_state before and restore_state afterward. 
+text_rotate(PDF, Angle)->
+    append_stream(PDF, eg_pdf_op:text_rotate(Angle)).
+
+%% @doc Uses the angle given to rotate the text (not graphic) coordinate space.
+%% Usually you save_state before and restore_state afterward. 
+text_rotate_position(PDF, X, Y, Angle)->
+    append_stream(PDF, eg_pdf_op:text_rotate_position(X, Y, Angle)).
+
+%% @doc This changes the X,Y cordinate directions from 0 degrees for X and 90 for Y.
+%% This might be used to make letters look italic.
+skew(PDF, XScewAngle, YScewAngle)->
+    append_stream( PDF, eg_pdf_op:skew(XScewAngle, YScewAngle) ).
+
+%% @private
+mirror_yaxis(PDF,Xtranslate)->
+    append_stream(PDF, eg_pdf_op:mirror_yaxis(Xtranslate)).
+
+%% @private
+mirror_xaxis(PDF,Ytranslate)->
+    append_stream(PDF, eg_pdf_op:mirror_xaxis(Ytranslate)).
+
+%% @private
+set_fill_color_CMYK(PDF,C,M,Y,K)->
+    append_stream(PDF, eg_pdf_op:set_fill_color_CMYK(C,M,Y,K)).
+
+%% @private
+set_stroke_color_CMYK(PDF,C,M,Y,K)->
+    append_stream(PDF, eg_pdf_op:set_stroke_color_CMYK(C,M,Y,K)).
+
+%% @doc This sets the fill color in the graphics state to the color value given.
+%% R, G, B are 0 - 1
+set_fill_color_RGB(PDF,R,G,B)->
+    append_stream(PDF, eg_pdf_op:set_fill_color_RGB(R,G,B)).
+
+%% @doc This sets the stroke color in the graphics state to the color value given.
+%% R, G, B are 0 - 1
+set_stroke_color_RGB(PDF,R,G,B)->
+    append_stream(PDF, eg_pdf_op:set_stroke_color_RGB(R,G,B)).
+
+%% @doc This sets the fill color in the graphics state to the color value given.
+%% "Color" is a tuple like {16#FF,16#FF,16#FF} (this is white).
+%% You can also use pdf_op:color(darkturquoise) to select a color. pdf_op has long list of colors
+%% you can select this way.
+set_fill_color(PDF, Color)->
+    append_stream(PDF, eg_pdf_op:set_fill_color(Color)).
+
+%% @doc This sets the stroke color in the graphics state to the color value given.
+%% "Color" is a tuple like {16#FF,16#FF,16#FF} (this is white).
+%% You can also use pdf_op:color(darkturquoise) to select a color. pdf_op has long list of colors
+%% you can select this way.
+set_stroke_color(PDF, Color)->
+    append_stream(PDF, eg_pdf_op:set_stroke_color(Color)).
     
-%% Change geometry
-text_transform(PID, A, B, C, D, E, F)->
-    append_stream(PID, eg_pdf_op:text_transform(A, B, C, D, E, F)).
+%% @doc This sets the fill color of the graphics state to the value of "Gray" given in the call.
+%% For example,  0.0 = Black 1.0 = White.
+set_fill_gray(PDF, Gray)->
+    append_stream(PDF, eg_pdf_op:set_fill_gray(Gray) ).
 
-translate(PID, X, Y)->
-    append_stream(PID, eg_pdf_op:translate(X,Y)).
-
-scale(PID, ScaleX, ScaleY) when is_integer(ScaleX), is_integer(ScaleY)->
-    append_stream(PID, eg_pdf_op:scale(ScaleX, ScaleY)).
-
-rotate(PID, Angle)->
-    append_stream(PID, eg_pdf_op:rotate(Angle)).
-
-text_rotate(PID, Angle)->
-    append_stream(PID, eg_pdf_op:text_rotate(Angle)).
-    
-text_rotate_position(PID, X, Y, Angle)->
-    append_stream(PID, eg_pdf_op:text_rotate_position(X, Y, Angle)).
-
-skew(PID, XScewAngle, YScewAngle)->
-    append_stream( PID, eg_pdf_op:skew(XScewAngle, YScewAngle) ).
-
-mirror_yaxis(PID,Xtranslate)->
-    append_stream(PID, eg_pdf_op:mirror_yaxis(Xtranslate)).
-
-mirror_xaxis(PID,Ytranslate)->
-    append_stream(PID, eg_pdf_op:mirror_xaxis(Ytranslate)).
-
-%% Changing colors
-%% Color value range 0 - 1
-set_fill_color_CMYK(PID,C,M,Y,K)->
-    append_stream(PID, eg_pdf_op:set_fill_color_CMYK(C,M,Y,K)).
-
-set_stroke_color_CMYK(PID,C,M,Y,K)->
-    append_stream(PID, eg_pdf_op:set_stroke_color_CMYK(C,M,Y,K)).
-
-%% Color value range 0 - 1
-set_fill_color_RGB(PID,R,G,B)->
-    append_stream(PID, eg_pdf_op:set_fill_color_RGB(R,G,B)).
-
-set_stroke_color_RGB(PID,R,G,B)->
-    append_stream(PID, eg_pdf_op:set_stroke_color_RGB(R,G,B)).
-
-%% Color is Name |{R,G,B}, Name = atom(), 0 < R,G,B < 255 
-set_fill_color(PID, Color)->
-    append_stream(PID, eg_pdf_op:set_fill_color(Color)).
-
-set_stroke_color(PID, Color)->
-    append_stream(PID, eg_pdf_op:set_stroke_color(Color)).
-
-    
-%% Gray 0.0-Black 1.0-White)
-set_fill_gray(PID, Gray)->
-    append_stream(PID, eg_pdf_op:set_fill_gray(Gray) ).
-
-set_stroke_gray(PID, Gray)->
-    append_stream(PID, eg_pdf_op:set_stroke_gray(Gray)).
+%% @doc This sets the stroke color of the graphics state to the value of "Gray" given in the call.
+%% For example,  0.0 = Black 1.0 = White.
+set_stroke_gray(PDF, Gray)->
+    append_stream(PDF, eg_pdf_op:set_stroke_gray(Gray)).
 
 %% Images
-%% image(PID, FilePath )
-%% image(PID, FilePath, Size)
-%% image(PID, FilePath, Pos, Size)
+%% image(PDF, FilePath )
+%% image(PDF, FilePath, Size)
+%% image(PDF, FilePath, Pos, Size)
 %% Pos is {X,Y}
 %% Size is {width, W} | {height, H} | {W,H} | {max, W, H} 
 %% The max Size version can be used to set a max limit on width, height or both
 %% dimensions (undefined is a valid value for at most 1 W or H value)
 
-image(PID, FilePath)->
-    save_state(PID),
-    case image1(PID, FilePath, {size,{undefined,undefined}}) of
+%% @doc Adds an image
+-spec image(PDF::any(), FilePath::string()) -> {error, term()} | ok.
+image(PDF, FilePath)->
+    save_state(PDF),
+    case image1(PDF, FilePath, {size,{undefined,undefined}}) of
 	{error, Reason} -> 
 	    {error, Reason};
 	ok ->
-	    restore_state(PID)
+	    restore_state(PDF)
     end.
 
-image(PID, FilePath, Size)->
-    save_state(PID),
-    case image1(PID, FilePath, Size) of
+%% @doc Adds an image.
+%% Size is {width, W} | {height, H} | {W,H} | {max, W, H} 
+image(PDF, FilePath, Size)->
+    save_state(PDF),
+    case image1(PDF, FilePath, Size) of
 	{error, Reason} ->
 	    {error, Reason};
 	ok ->
-	    restore_state(PID)
+	    restore_state(PDF)
     end.
 
-image(PID, FilePath, {X,Y}, Size)  ->
-    save_state(PID),
-    translate(PID,X,Y),
-    case image1(PID, FilePath, Size) of
+%% @doc Adds an image.
+%% Size is {width, W} | {height, H} | {W,H} | {max, W, H} 
+%% Pos is {X,Y}
+image(PDF, FilePath, {X,Y}, Size)  ->
+    save_state(PDF),
+    translate(PDF,X,Y),
+    case image1(PDF, FilePath, Size) of
 	{error, Reason} -> 
 	    {error, Reason};
 	ok ->
-	    restore_state(PID)
+	    restore_state(PDF)
     end.
 
-image1(PID, FilePath, {max, undefined, H})->
-    image1(PID, FilePath, {height, H});
-image1(PID, FilePath, {max, W, undefined})->
-    image1(PID, FilePath, {width, W});
-image1(PID, FilePath, {max, W, H})->
-    image1(PID, FilePath, {size, {max, W, H}});
-image1(PID, FilePath, {width, W})->
-    image1(PID, FilePath, {size,{W,undefined}});
-image1(PID, FilePath, {height, H}) ->
-    image1(PID, FilePath, {size,{undefined,H}});
-image1(PID, FilePath, {W, H}) when is_integer(W), is_integer(H)->
-    image1(PID, FilePath, {size,{W,H}});
-image1(PID, FilePath, {size,Size})->
+image1(PDF, FilePath, {max, undefined, H})->
+    image1(PDF, FilePath, {height, H});
+image1(PDF, FilePath, {max, W, undefined})->
+    image1(PDF, FilePath, {width, W});
+image1(PDF, FilePath, {max, W, H})->
+    image1(PDF, FilePath, {size, {max, W, H}});
+image1(PDF, FilePath, {width, W})->
+    image1(PDF, FilePath, {size,{W,undefined}});
+image1(PDF, FilePath, {height, H}) ->
+    image1(PDF, FilePath, {size,{undefined,H}});
+image1(PDF, FilePath, {W, H}) when is_integer(W), is_integer(H)->
+    image1(PDF, FilePath, {size,{W,H}});
+image1(PDF, FilePath, {size,Size})->
     case file:open(FilePath,[read]) of
 	{ok,IO} -> 
 	    file:close(IO),
-	    gen_server:cast(PID, {image, FilePath, Size});
+	    gen_server:cast(PDF, {image, FilePath, Size});
 	{error, OpenError} ->
 	    {error, OpenError}
     end.
@@ -555,8 +652,9 @@ image1(PID, FilePath, {size,Size})->
 
 
 %% Internals
-append_stream(PID, String)->
-    gen_server:cast(PID, {stream, {append, String}}).
+%% @private
+append_stream(PDF, String)->
+    gen_server:cast(PDF, {stream, {append, String}}).
 
 
 
@@ -569,13 +667,11 @@ append_stream(PID, String)->
 %% 	    io:format("Font:~s is missing using Times-Roman~n", [Font]),
 %% 	    1
 %%     end.
-
+%% @private
 default_face() ->
     eg_richText:mk_face("Times-Roman", 12, true, default, 0).
 
-%% all_fonts() ->
-%%     eg_font_map:all_fonts().
-
+%% @doc This returns a list of strings that name the standard "in-built" fonts.
 inBuiltFonts() ->
     ["Helvetica","Helvetica-Bold","Helvetica-Oblique",
      "Helvetica-BoldOblique",
@@ -591,6 +687,7 @@ inBuiltFonts() ->
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
+%% @private
 start_link(Init) ->
     gen_server:start_link({local,pdf}, ?MODULE, Init, []).
 
@@ -605,6 +702,7 @@ start_link(Init) ->
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
+%% @private
 init(Init) ->
     {ok, Init}.
 
@@ -617,7 +715,8 @@ init(Init) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
-    	
+%% @private
+
 handle_call({get_page_no}, _From, [PDFC, Stream]) ->	        
 	    {reply, {page, PDFC#pdfContext.currentpage}, [PDFC, Stream]};
 
@@ -653,7 +752,8 @@ handle_call({get_state}, _From, [PDFC, Stream]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
-	    	    
+%% @private
+
 handle_cast({mediabox, Mediabox}, [PDFC, Stream]) ->	
 	    {noreply, [PDFC#pdfContext{mediabox=Mediabox}, Stream]};
 	    	    
@@ -706,6 +806,7 @@ handle_cast({ensure_font, Fontname}, [PDFC, Stream]) ->
 %%                                       {stop, Reason, State}
 %% Description: Handling all non call/cast messages
 %%--------------------------------------------------------------------
+%% @private
 handle_info(_Info, State) ->
     {noreply, State}.
 
@@ -716,6 +817,7 @@ handle_info(_Info, State) ->
 %% cleaning up. When it returns, the gen_server terminates with Reason.
 %% The return value is ignored.
 %%--------------------------------------------------------------------
+%% @private
 terminate(_Reason, _State) ->
     ok.
 
@@ -723,6 +825,7 @@ terminate(_Reason, _State) ->
 %% Func: code_change(OldVsn, State, Extra) -> {ok, NewState}
 %% Description: Convert process state when code is changed
 %%--------------------------------------------------------------------
+%% @private
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
@@ -978,12 +1081,13 @@ mkPage(Parent, Contents, Script) ->
 mkPageContents(Str) ->
     {stream, Str}.
 
- 
+%% @private
 header() ->
     "%PDF-1.3" ++ [8#015,$%,8#342,8#343,8#317,8#323, 8#015,8#012].
 
 %% Objs = {ObjNo, Startpos}
 
+%% @private
 add_xref(F, Objs) ->
     {ok, P} = file:position(F, cur),
     XrefStart = P,
@@ -992,17 +1096,19 @@ add_xref(F, Objs) ->
     file:write(F, L),
     XrefStart.
 
+%% @private
 xref(I, Str) ->
     S = lists:flatten(io_lib:format("~10.10.0w", [I])),
     [S," ", Str,"\r\n"].
 
-
+%% @private
 add_trailer(F, Objs, Root, Info) ->
     L = ["trailer << /Size ", eg_pdf_op:i2s(length(Objs)+1),
 	 " /Root ",eg_pdf_op:i2s(Root), " 0 R ",
 	 " /Info ",eg_pdf_op:i2s(Info), " 0 R >>\n"],
     file:write(F, L).
 
+%% @private
 add_start_xref(F, XrefStartPos) ->
     L = ["startxref\n",eg_pdf_op:i2s(XrefStartPos),"\n%%EOF\n"],
     file:write(F, L).

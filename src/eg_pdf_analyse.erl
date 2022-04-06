@@ -24,6 +24,7 @@
 %% Purpose: Analyse a PDF file, manipulate PDF files, pack and unpack files
 %% into PDF files
 %% =========================================================================
+%% @private
 
 -module(eg_pdf_analyse).
 

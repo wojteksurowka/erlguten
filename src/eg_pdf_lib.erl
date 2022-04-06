@@ -46,6 +46,7 @@
 %%  Ref       = integer()
 %%  pdfstring() = {string, string()} | {hexstring, string()}
 %%  deeplist()  = deeplist() | string()
+%% @private
 
 -module(eg_pdf_lib).
 
@@ -448,7 +449,7 @@ i(X) -> integer_to_list(X).
 %% showGrid(PDF, pagesize atom from eg_pdf.erl) 
 %%   adds a grid to the current page 
 
-
+-spec showGrid(any(), any()) -> any().
 showGrid(PDF, Paper) ->
     {_,_,PaperWidth, PaperHeight} = eg_pdf:pagesize(Paper),
     Top = round((PaperHeight - 20) / 25) * 25, % make grid lines fall on multiples of 25
@@ -459,6 +460,7 @@ showGrid(PDF, Paper) ->
     vlines(PDF, Left, Right, Top, Bottom),
     hlines(PDF, Left, Right, Top, Bottom).
 
+-spec hlines(any(), any(), any(), any(), any()) -> any().
 hlines(PDF, Left, Right, Top, _Bottom) ->
     eg_pdf:save_state(PDF),
 	  eg_pdf:set_font(PDF,"Helvetica", 6),
@@ -475,6 +477,7 @@ hlines(PDF, Left, Right, Top, _Bottom) ->
 	  end),
 	  eg_pdf:restore_state(PDF).
 
+-spec moveAndShow(any(), any(), any(), any(), any()) -> any().
 vlines(PDF, _Left, Right, Top, Bottom) ->
     eg_pdf:save_state(PDF),
 	  eg_pdf:set_font(PDF,"Helvetica", 6),
@@ -488,6 +491,7 @@ vlines(PDF, _Left, Right, Top, Bottom) ->
 	  end),
 	  eg_pdf:restore_state(PDF).
 
+-spec moveAndShow(any(), any(), any(), any()) -> any().
 moveAndShow(PDF, X, Y, Str) ->
     eg_pdf:begin_text(PDF),
     eg_pdf:set_text_pos(PDF, X, Y),

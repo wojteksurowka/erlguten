@@ -1,3 +1,4 @@
+%% @private
 -module(eg_font_14).
 -export([width/1, kern/2, fontName/0, firstChar/0,lastChar/0]).
 -export([index/0,ascender/0,capHeight/0,descender/0,italicAngle/0]).

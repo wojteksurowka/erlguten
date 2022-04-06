@@ -24,6 +24,7 @@
 %% Authors: Sean Hinde <sean.hinde@mac.com>, Carl Wright <wright@servicelevel.net>
 %% Purpose: Add API call to create a table in a document.
 %%==========================================================================
+%% @private
 
 -module (eg_block).
 
