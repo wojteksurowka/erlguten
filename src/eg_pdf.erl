@@ -292,6 +292,7 @@ inches(X) -> round(X * 72.21).
 cms(X) -> round((X * 72.21) / 2.54).
 
 %% @doc Returns RGB value of a color name.
+%% You can find color names in eg_pdf_op.
 -spec color(color()) -> {0..255, 0..255, 0..255}.
 color(Color) ->
     eg_pdf_op:color(Color).
