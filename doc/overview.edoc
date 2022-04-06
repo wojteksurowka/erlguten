@@ -57,7 +57,7 @@ with calls to the pdf module.
 
     To create all the content of the pdf as a string in the term Serialised
 
-<code>file:write_file("../test/eg_test6.pdf", [Serialised]),</code>
+<code>file:write_file("../test/eg_test6.pdf", Serialised),</code>
 
     To output the pdf content into a finished PDF file
 
