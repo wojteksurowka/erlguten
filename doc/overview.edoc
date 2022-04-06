@@ -53,7 +53,7 @@ with calls to the pdf module.
 
     To move to position (50,700) and place the "Hello Joe from Gutenberg" content
 
-<code>{Serialised, PageNo} = eg_pdf:export(PDF),</code>
+<code>{Serialised, PageCount} = eg_pdf:export(PDF),</code>
 
     To create all the content of the pdf as a string in the term Serialised
 
