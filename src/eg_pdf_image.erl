@@ -515,7 +515,7 @@ inflate_stream(Data) ->
   ok = zlib:inflateEnd(Z),
   zlib:close(Z),
   F = fun(A, B) -> <<A/binary, B/binary>> end,
-  MergedBinaries = lists:foldr(F, <<>>, Decompressed),
+  MergedBinaries = lists:foldr(F, <<>>, lists:flatten(Decompressed)),
   {ok,MergedBinaries}.
   
 %% @doc Compress a bit stream using the zlib/deflate algorithm
